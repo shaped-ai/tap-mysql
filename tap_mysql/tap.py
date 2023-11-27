@@ -10,7 +10,8 @@ from typing import Any, Mapping, cast
 
 import paramiko
 from singer_sdk import SQLTap, Stream
-from singer_sdk import typing as th  # JSON schema typing helpers
+from singer_sdk import typing as th
+import sqlalchemy  # JSON schema typing helpers
 from sqlalchemy.engine import URL
 from sqlalchemy.engine.url import make_url
 from sshtunnel import SSHTunnelForwarder
@@ -290,7 +291,7 @@ class TapMySQL(SQLTap):
             return self.input_catalog.to_dict()
 
         result: dict[str, list[dict]] = {"streams": []}
-        result["streams"].extend(self.connector.discover_catalog_entries())
+        result["streams"].extend(self.discover_catalog_entries())
 
         self._catalog_dict: dict = result
         return self._catalog_dict
@@ -305,3 +306,33 @@ class TapMySQL(SQLTap):
             MySQLStream(self, catalog_entry, connector=self.connector)
             for catalog_entry in self.catalog_dict["streams"]
         ]
+
+    def discover_catalog_entries(self) -> list[dict]:
+        """Return a list of catalog entries from discovery.
+
+        Returns:
+            The discovered catalog entries as a list.
+        """
+        result: list[dict] = []
+        engine = self.connector._engine
+        inspected = sqlalchemy.inspect(engine)
+        for schema_name in self.connector.get_schema_names(engine, inspected):
+            # Do not include 'information_schema'.
+            if schema_name == "information_schema":
+                continue
+            # Iterate through each table and view
+            for table_name, is_view in self.get_object_names(
+                engine,
+                inspected,
+                schema_name,
+            ):
+                catalog_entry = self.discover_catalog_entry(
+                    engine,
+                    inspected,
+                    schema_name,
+                    table_name,
+                    is_view,
+                )
+                result.append(catalog_entry.to_dict())
+
+        return result
