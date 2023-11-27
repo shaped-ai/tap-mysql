@@ -321,12 +321,12 @@ class TapMySQL(SQLTap):
             if schema_name == "information_schema":
                 continue
             # Iterate through each table and view
-            for table_name, is_view in self.get_object_names(
+            for table_name, is_view in self.connector.get_object_names(
                 engine,
                 inspected,
                 schema_name,
             ):
-                catalog_entry = self.discover_catalog_entry(
+                catalog_entry = self.connector.discover_catalog_entry(
                     engine,
                     inspected,
                     schema_name,
