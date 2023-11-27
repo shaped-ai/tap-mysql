@@ -318,7 +318,7 @@ class TapMySQL(SQLTap):
         inspected = sqlalchemy.inspect(engine)
         for schema_name in self.connector.get_schema_names(engine, inspected):
             # Do not include 'information_schema'.
-            if schema_name == "information_schema":
+            if schema_name in ["information_schema", "sys"]:
                 continue
             # Iterate through each table and view
             for table_name, is_view in self.connector.get_object_names(
