@@ -204,6 +204,13 @@ class MySQLStream(SQLStream):
                 msg,
             )
 
+        # Enable OLAP support for PlanetScale.
+        # https://planetscale.com/docs/reference/planetscale-system-limits#olap-mode
+        PLANETSCALE_HOSTS = ["psdb.cloud"]
+        current_host = self.connector.connection.engine.url.host
+        if any(planetscale_host in current_host for planetscale_host in PLANETSCALE_HOSTS):
+            self.connector.connection.execute("SET workload = OLAP")
+
         # pulling rows with only selected columns from stream
         selected_column_names = list(self.get_selected_schema()["properties"])
         table = self.connector.get_table(
