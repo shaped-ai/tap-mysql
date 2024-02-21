@@ -9,6 +9,7 @@ import sqlalchemy
 from singer_sdk import SQLConnector, SQLStream
 from singer_sdk import typing as th
 from singer_sdk.helpers._typing import TypeConformanceLevel
+from sqlalchemy.engine import Engine
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -40,6 +41,20 @@ singer_sdk.helpers._typing._conform_primitive_property = patched_conform  # noqa
 
 class MySQLConnector(SQLConnector):
     """Connects to the MySQL SQL source."""
+
+    def create_engine(self) -> Engine:
+        connect_args = {}
+        # Force SSL for PlanetScale.
+        PLANETSCALE_HOSTS = ["psdb.cloud"]
+        if any(
+            planetscale_host in self.config["host"] for planetscale_host in PLANETSCALE_HOSTS
+        ):
+            connect_args={
+                'ssl': {
+                    'ssl': True
+                }
+            }
+        return sqlalchemy.create_engine(self.sqlalchemy_url, connect_args=connect_args, echo=False)
 
     @staticmethod
     def to_jsonschema_type(
