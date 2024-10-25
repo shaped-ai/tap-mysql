@@ -45,7 +45,7 @@ class MySQLConnector(SQLConnector):
     def create_engine(self) -> Engine:
         connect_args = {}
         # Force SSL for required hosts.
-        SSL_HOSTS = ["psdb.cloud"]
+        SSL_HOSTS = ["psdb.cloud", "svc.singlestore.com"]
         if any(
             planetscale_host in self.sqlalchemy_url for planetscale_host in SSL_HOSTS
         ):
