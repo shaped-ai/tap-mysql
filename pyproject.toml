@@ -12,7 +12,6 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-fs-s3fs = { version = "==1.1.1", optional = true }
 singer-sdk = { version="~=0.39.0" }
 pymysql = "==1.1.0"
 sqlalchemy = "<2"
@@ -21,6 +20,7 @@ sshtunnel = "0.4.0"
 
 # Binary client for MySQL
 mysqlclient = { version = "==2.2.4" }
+urllib3 = ">=1.26.20,<2"
 
 [tool.poetry.group.dev.dependencies]
 faker = ">=20"
@@ -34,7 +34,6 @@ sqlalchemy = { version = "<2", extras = ["mypy"] }
 types-paramiko = ">=3.4.0.20240120"
 
 [tool.poetry.extras]
-s3 = ["fs-s3fs"]
 binary = ["mysqlclient"]
 
 [tool.mypy]
