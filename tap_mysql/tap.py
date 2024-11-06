@@ -172,12 +172,12 @@ class TapMySQL(SQLTap):
         if config.get("sqlalchemy_url"):
             return cast(str, config["sqlalchemy_url"])
 
-        dialect = "mysql"
+        drivername = "mysql+pymysql"
         if "svc.singlestore.com" in config["host"]:
-            dialect = "singlestoredb"
+            drivername = "singlestoredb"
 
         sqlalchemy_url = URL.create(
-            drivername=f"{dialect}+pymysql",
+            drivername=drivername,
             username=config["user"],
             password=config["password"],
             host=config["host"],
