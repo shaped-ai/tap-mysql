@@ -15,6 +15,7 @@ python = ">=3.8"
 singer-sdk = { version="~=0.39.0" }
 pymysql = "==1.1.0"
 sqlalchemy = "<2"
+singlestoredb = "==1.8.0"
 sqlalchemy-singlestoredb = "==1.1.1"
 sshtunnel = "0.4.0"
 
