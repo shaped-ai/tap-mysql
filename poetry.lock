@@ -1878,4 +1878,4 @@ binary = ["mysqlclient"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.8"
-content-hash = "a1068ebdedcb314c6072e6dbce02ad7ac20b3c77fd0db7e6f967c12bfba974ec"
+content-hash = "eae733b768453e45a272574fd866580567ab27752b363fd32a0ae0c5db4411f9"
