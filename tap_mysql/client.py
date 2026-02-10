@@ -1,6 +1,8 @@
 """SQL client handling."""
+
 from __future__ import annotations
 
+import copy
 import datetime
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -47,22 +49,20 @@ class MySQLConnector(SQLConnector):
         connect_args = {}
         # Force SSL for required hosts.
         SSL_HOSTS = ["psdb.cloud"]
-        if any(
-            ssl_host in self.sqlalchemy_url for ssl_host in SSL_HOSTS
-        ):
-            connect_args={
-                'ssl': {
-                    'ssl': True
-                }
-            }
-        return sqlalchemy.create_engine(self.sqlalchemy_url, connect_args=connect_args, echo=False)
+        if any(ssl_host in self.sqlalchemy_url for ssl_host in SSL_HOSTS):
+            connect_args = {"ssl": {"ssl": True}}
+        return sqlalchemy.create_engine(
+            self.sqlalchemy_url, connect_args=connect_args, echo=False
+        )
 
     @staticmethod
     def to_jsonschema_type(
-        sql_type: str  # noqa: ANN401
-        | sqlalchemy.types.TypeEngine
-        | type[sqlalchemy.types.TypeEngine]
-        | Any,
+        sql_type: (
+            str  # noqa: ANN401
+            | sqlalchemy.types.TypeEngine
+            | type[sqlalchemy.types.TypeEngine]
+            | Any
+        ),
     ) -> dict:
         """Return a JSON Schema representation of the provided type.
 
@@ -100,9 +100,9 @@ class MySQLConnector(SQLConnector):
 
     @staticmethod
     def sdk_typing_object(
-        from_type: str
-        | sqlalchemy.types.TypeEngine
-        | type[sqlalchemy.types.TypeEngine],
+        from_type: (
+            str | sqlalchemy.types.TypeEngine | type[sqlalchemy.types.TypeEngine]
+        ),
     ) -> (
         th.DateTimeType
         | th.NumberType
@@ -195,6 +195,36 @@ class MySQLStream(SQLStream):
     # JSONB Objects won't be selected without type_confomance_level to ROOT_ONLY
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.ROOT_ONLY
 
+    @property
+    def effective_schema(self) -> dict:
+        """Schema used for replication key checks; ensure replication_key is present.
+
+        When catalog selection omits the replication key (e.g. empty properties from
+        TAP_MYSQL__SELECT), singer_sdk 0.49 raises InvalidReplicationKeyException.
+        We reflect the column from the DB and add it so the check passes.
+        """
+        schema = copy.deepcopy(super().effective_schema)
+        if not self.replication_key:
+            return schema
+        if self.replication_key in schema.get("properties", {}):
+            return schema
+        try:
+            table_cols = self.connector.get_table_columns(
+                self.fully_qualified_name, column_names=[self.replication_key]
+            )
+            if self.replication_key in table_cols:
+                col = table_cols[self.replication_key]
+                schema.setdefault("properties", {})[self.replication_key] = (
+                    self.connector.to_jsonschema_type(col.type)
+                )
+        except Exception:
+            # Fallback so is_timestamp_replication_key does not raise.
+            schema.setdefault("properties", {})[self.replication_key] = {
+                "type": "string",
+                "format": "date-time",
+            }
+        return schema
+
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
@@ -224,7 +254,9 @@ class MySQLStream(SQLStream):
         # https://planetscale.com/docs/reference/planetscale-system-limits#olap-mode
         PLANETSCALE_HOSTS = ["psdb.cloud"]
         current_host = self.connector.connection.engine.url.host
-        if any(planetscale_host in current_host for planetscale_host in PLANETSCALE_HOSTS):
+        if any(
+            planetscale_host in current_host for planetscale_host in PLANETSCALE_HOSTS
+        ):
             self.connector.connection.execute(text("SET workload = OLAP"))
 
         # pulling rows with only selected columns from stream
