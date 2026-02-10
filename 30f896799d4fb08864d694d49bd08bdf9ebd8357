@@ -1,0 +1,25 @@
+tox.ini
+  c9e5bb07287a0930 4
+pyproject.toml
+  c9e5bb07287a0930 14-15,29,47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.42",
+  "base_commit_sha": "30f896799d4fb08864d694d49bd08bdf9ebd8357",
+  "prompts": {
+    "c9e5bb07287a0930": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "345525ac-9d00-482d-b5fd-d9aaf0d3c40b",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 6,
+      "total_deletions": 6,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    }
+  }
+}
