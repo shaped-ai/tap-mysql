@@ -1,10 +1,22 @@
 """mysql tap class."""
 from __future__ import annotations
 
+import subprocess
+import sys
+
+# Ensure pkg_resources (setuptools) is available before singer_sdk import;
+# singer_sdk -> fs uses it and it may be missing in minimal/venv installs.
+try:
+    import pkg_resources  # noqa: F401
+except ModuleNotFoundError:
+    subprocess.check_call(  # noqa: S603
+        [sys.executable, "-m", "pip", "install", "setuptools>=42"]
+    )
+    import pkg_resources  # noqa: F401
+
 import atexit
 import io
 import signal
-import sys
 from functools import cached_property
 from typing import Any, Mapping, cast
 
