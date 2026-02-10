@@ -9,7 +9,7 @@ import singer_sdk.helpers._typing
 import sqlalchemy
 from singer_sdk import SQLConnector, SQLStream
 from singer_sdk import typing as th
-from singer_sdk.exceptions import InvalidReplicationKeyException
+from singer_sdk.exceptions import DiscoveryError, InvalidReplicationKeyException
 from singer_sdk.helpers._typing import TypeConformanceLevel, is_datetime_type
 from sqlalchemy.engine import Engine
 
@@ -201,8 +201,13 @@ class MySQLStream(SQLStream):
         Return selected schema, ensuring replication_key and primary_keys
         are always included so downstream (target) and record pruning see them.
         """
-        schema = copy.deepcopy(super().get_selected_schema())
-        full_props = self.schema.get("properties", {})
+        # So parent's get_selected_schema() sees raw schema (avoids recursion)
+        self._return_raw_schema = True
+        try:
+            schema = copy.deepcopy(super().get_selected_schema())
+        finally:
+            self._return_raw_schema = False
+        full_props = (self._schema or {}).get("properties", {})
         properties = schema.setdefault("properties", {})
 
         def ensure_property(key: str) -> None:
@@ -224,16 +229,20 @@ class MySQLStream(SQLStream):
         return schema
 
     @property
-    def effective_schema(self) -> dict:
-        """Schema used for SCHEMA message and record pruning; include keys.
-
-        When the catalog selects a subset of columns, replication_key and
-        primary_keys can be omitted, causing the target to fail (e.g. missing
-        movie_id) and the tap to strip those properties from records. Return
-        get_selected_schema() so the emitted schema and pruning use a complete
-        schema that includes replication_key and primary_keys.
+    def schema(self) -> dict:
+        """Schema for this stream; include replication_key and primary_keys.
         """
+        if getattr(self, "_return_raw_schema", False):
+            if self._schema is None:
+                msg = f"The schema for stream '{self.name}' was not provided"
+                raise DiscoveryError(msg)
+            return self._schema
         return self.get_selected_schema()
+
+    @property
+    def effective_schema(self) -> dict:
+        """Schema used for record pruning; delegate to schema (already merged)."""
+        return self.schema
 
     @property
     def is_timestamp_replication_key(self) -> bool:
