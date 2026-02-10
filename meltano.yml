@@ -8,7 +8,7 @@ plugins:
   extractors:
   - name: tap-mysql
     namespace: tap_mysql
-    pip_url: -e . setuptools>=42
+    pip_url: -e .
     capabilities:
     - state
     - catalog
