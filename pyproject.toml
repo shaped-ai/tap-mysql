@@ -11,15 +11,15 @@ keywords = [
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = ">=3.9"
-singer-sdk = { version="~=0.45.0" }
+python = ">=3.10,<4.0"
+singer-sdk = { version="~=0.49.0" }
 pymysql = "==1.1.0"
-sqlalchemy = "<2"
+sqlalchemy = ">=2"
 singlestoredb = "==1.8.0"
 sqlalchemy-singlestoredb = "==1.1.1"
 sshtunnel = "0.4.0"
 pendulum = ">=2.1,<4"
-packaging = ">=24.0"
+packaging = ">=24.2"
 
 # Binary client for MySQL
 mysqlclient = { version = "==2.2.4" }
@@ -28,12 +28,12 @@ urllib3 = ">=1.26.20,<2"
 [tool.poetry.group.dev.dependencies]
 faker = ">=20"
 pytest = ">=7.3.2"
-singer-sdk = { version="~=0.45.0", extras = ["testing"] }
+singer-sdk = { version="~=0.49.0", extras = ["testing"] }
 remote-pdb=">=2.1.0"
 
 [tool.poetry.group.typing.dependencies]
 mypy = ">=1.8.0"
-sqlalchemy = { version = "<2", extras = ["mypy"] }
+sqlalchemy = { version = ">=2", extras = ["mypy"] }
 types-paramiko = ">=3.4.0.20240120"
 
 [tool.poetry.extras]
@@ -42,8 +42,7 @@ binary = ["mysqlclient"]
 [tool.mypy]
 python_version = "3.12"
 warn_unused_configs = true
-plugins = "sqlalchemy.ext.mypy.plugin"  # TODO: Remove this when SQLAlchemy 2.0 is supported
-
+plugins = "sqlalchemy.ext.mypy.plugin"  
 [tool.ruff]
 src = ["tap_mysql"]
 target-version = "py39"

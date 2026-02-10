@@ -1,7 +1,6 @@
 """SQL client handling."""
 from __future__ import annotations
 
-import copy
 import datetime
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -9,8 +8,8 @@ import singer_sdk.helpers._typing
 import sqlalchemy
 from singer_sdk import SQLConnector, SQLStream
 from singer_sdk import typing as th
-from singer_sdk.exceptions import InvalidReplicationKeyException
-from singer_sdk.helpers._typing import TypeConformanceLevel, is_datetime_type
+from singer_sdk.helpers._typing import TypeConformanceLevel
+from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
 if TYPE_CHECKING:
@@ -196,49 +195,6 @@ class MySQLStream(SQLStream):
     # JSONB Objects won't be selected without type_confomance_level to ROOT_ONLY
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.ROOT_ONLY
 
-    def get_selected_schema(self) -> dict:
-        """
-        Return selected schema, ensuring replication_key is always included.
-        """
-        schema = copy.deepcopy(super().get_selected_schema())
-        if self.replication_key:
-            properties = schema.get("properties", {})
-            if self.replication_key not in properties:
-                full_props = self.schema.get("properties", {})
-                if self.replication_key in full_props:
-                    schema.setdefault("properties", {})[self.replication_key] = (
-                        full_props[
-                        self.replication_key
-                    ])
-                else:
-                    # Catalog may have replication_key but key not in schema;
-                    # add a generic date-time so SDK validation passes.
-                    schema.setdefault("properties", {})[self.replication_key] = {
-                        "type": ["string", "null"],
-                        "format": "date-time",
-                    }
-        return schema
-
-    @property
-    def is_timestamp_replication_key(self) -> bool:
-        """Check replication key using selected schema so key is always present.
-
-        The SDK uses effective_schema (catalog schema) which may omit the
-        replication key when only a subset of columns is selected. We use
-        get_selected_schema() which ensures the replication key is included.
-        """
-        if not self.replication_key:
-            return False
-        schema = self.get_selected_schema()
-        type_dict = schema.get("properties", {}).get(self.replication_key)
-        if type_dict is None:
-            msg = (
-                f"Field '{self.replication_key}' is not in schema for stream "
-                f"'{self.name}'"
-            )
-            raise InvalidReplicationKeyException(msg)
-        return is_datetime_type(type_dict)
-
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
 
@@ -269,7 +225,7 @@ class MySQLStream(SQLStream):
         PLANETSCALE_HOSTS = ["psdb.cloud"]
         current_host = self.connector.connection.engine.url.host
         if any(planetscale_host in current_host for planetscale_host in PLANETSCALE_HOSTS):
-            self.connector.connection.execute("SET workload = OLAP")
+            self.connector.connection.execute(text("SET workload = OLAP"))
 
         # pulling rows with only selected columns from stream
         selected_column_names = list(self.get_selected_schema()["properties"])
@@ -284,7 +240,7 @@ class MySQLStream(SQLStream):
 
             start_val = self.get_starting_replication_key_value(context)
             if start_val:
-                query = query.filter(replication_key_col >= start_val)
+                query = query.where(replication_key_col >= start_val)
 
         for row in self.connector.connection.execute(query):
             yield dict(row)
