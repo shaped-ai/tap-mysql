@@ -12,7 +12,7 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.8"
-singer-sdk = { version="~=0.39.0" }
+singer-sdk = { version="~=0.45.0" }
 pymysql = "==1.1.0"
 sqlalchemy = "<2"
 singlestoredb = "==1.8.0"
@@ -26,7 +26,7 @@ urllib3 = ">=1.26.20,<2"
 [tool.poetry.group.dev.dependencies]
 faker = ">=20"
 pytest = ">=7.3.2"
-singer-sdk = { version="~=0.39.0", extras = ["testing"] }
+singer-sdk = { version="~=0.45.0", extras = ["testing"] }
 remote-pdb=">=2.1.0"
 
 [tool.poetry.group.typing.dependencies]
