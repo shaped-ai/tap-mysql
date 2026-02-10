@@ -1,0 +1,23 @@
+tap_mysql/client.py
+  c9e5bb07287a0930 4,198-199,202-207,209-210,212-220
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.1",
+  "base_commit_sha": "41e250e08e0c19212d102323638a20c8f3b7f805",
+  "prompts": {
+    "c9e5bb07287a0930": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "345525ac-9d00-482d-b5fd-d9aaf0d3c40b",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 27,
+      "total_deletions": 0,
+      "accepted_lines": 20,
+      "overriden_lines": 2
+    }
+  }
+}
