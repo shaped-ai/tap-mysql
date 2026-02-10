@@ -9,7 +9,8 @@ import singer_sdk.helpers._typing
 import sqlalchemy
 from singer_sdk import SQLConnector, SQLStream
 from singer_sdk import typing as th
-from singer_sdk.helpers._typing import TypeConformanceLevel
+from singer_sdk.exceptions import InvalidReplicationKeyException
+from singer_sdk.helpers._typing import TypeConformanceLevel, is_datetime_type
 from sqlalchemy.engine import Engine
 
 if TYPE_CHECKING:
@@ -217,6 +218,26 @@ class MySQLStream(SQLStream):
                         "format": "date-time",
                     }
         return schema
+
+    @property
+    def is_timestamp_replication_key(self) -> bool:
+        """Check replication key using selected schema so key is always present.
+
+        The SDK uses effective_schema (catalog schema) which may omit the
+        replication key when only a subset of columns is selected. We use
+        get_selected_schema() which ensures the replication key is included.
+        """
+        if not self.replication_key:
+            return False
+        schema = self.get_selected_schema()
+        type_dict = schema.get("properties", {}).get(self.replication_key)
+        if type_dict is None:
+            msg = (
+                f"Field '{self.replication_key}' is not in schema for stream "
+                f"'{self.name}'"
+            )
+            raise InvalidReplicationKeyException(msg)
+        return is_datetime_type(type_dict)
 
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
