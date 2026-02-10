@@ -18,6 +18,8 @@ sqlalchemy = "<2"
 singlestoredb = "==1.8.0"
 sqlalchemy-singlestoredb = "==1.1.1"
 sshtunnel = "0.4.0"
+pendulum = ">=2.1,<4"
+packaging = ">=24.0"
 
 # Binary client for MySQL
 mysqlclient = { version = "==2.2.4" }
