@@ -1,0 +1,23 @@
+.github/workflows/test.yml
+  c9e5bb07287a0930 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.42",
+  "base_commit_sha": "0fb7184aae89daef8a16683366234971798a56a8",
+  "prompts": {
+    "c9e5bb07287a0930": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "345525ac-9d00-482d-b5fd-d9aaf0d3c40b",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
