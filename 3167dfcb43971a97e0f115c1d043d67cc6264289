@@ -1,0 +1,25 @@
+tap_mysql/client.py
+  966a8d3fb483246e 12,228,243
+pyproject.toml
+  966a8d3fb483246e 14,17,22,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.1",
+  "base_commit_sha": "3167dfcb43971a97e0f115c1d043d67cc6264289",
+  "prompts": {
+    "966a8d3fb483246e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c1db633e-50ee-4ba3-b6e2-91eddaaf047f",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 14,
+      "total_deletions": 59,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
