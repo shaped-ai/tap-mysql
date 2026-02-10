@@ -275,4 +275,4 @@ class MySQLStream(SQLStream):
                 query = query.where(replication_key_col >= start_val)
 
         for row in self.connector.connection.execute(query):
-            yield dict(row)
+            yield dict(row._mapping)
