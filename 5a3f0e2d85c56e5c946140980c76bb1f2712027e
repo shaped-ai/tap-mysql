@@ -1,0 +1,23 @@
+tap_mysql/tap.py
+  a48d93fe03ec087d 4-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.1",
+  "base_commit_sha": "5a3f0e2d85c56e5c946140980c76bb1f2712027e",
+  "prompts": {
+    "a48d93fe03ec087d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fd02f96a-7310-46b0-9023-51b2b099858b",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 17,
+      "total_deletions": 5,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    }
+  }
+}
