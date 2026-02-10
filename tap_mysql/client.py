@@ -42,6 +42,13 @@ def patched_conform(
 singer_sdk.helpers._typing._conform_primitive_property = patched_conform  # noqa: SLF001
 
 
+class _SelectAllMask:
+    """Mask that selects all properties; used when catalog schema has no properties."""
+
+    def __getitem__(self, key: tuple) -> bool:
+        return True
+
+
 class MySQLConnector(SQLConnector):
     """Connects to the MySQL SQL source."""
 
@@ -194,6 +201,35 @@ class MySQLStream(SQLStream):
 
     # JSONB Objects won't be selected without type_confomance_level to ROOT_ONLY
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.ROOT_ONLY
+
+    def _get_full_schema_from_connector(self) -> dict:
+        """Build full table schema from connector when catalog has no properties."""
+        table_cols = self.connector.get_table_columns(self.fully_qualified_name)
+        properties = {
+            name: self.connector.to_jsonschema_type(col.type)
+            for name, col in table_cols.items()
+        }
+        return {"type": "object", "properties": properties}
+
+    @property
+    def schema(self) -> dict:
+        """Use full table schema when catalog has no properties (avoids stripping records)."""
+        base = getattr(self, "_schema", None)
+        if base and base.get("properties"):
+            return base
+        if not hasattr(self, "_full_schema_cache"):
+            self._full_schema_cache = self._get_full_schema_from_connector()
+        return self._full_schema_cache
+
+    @property
+    def mask(self):
+        """Select all properties when catalog had no properties."""
+        base = getattr(self, "_schema", None)
+        if base is not None and not base.get("properties"):
+            return _SelectAllMask()
+        if self._mask is None:
+            self._mask = self.metadata.resolve_selection()
+        return self._mask
 
     @property
     def effective_schema(self) -> dict:
