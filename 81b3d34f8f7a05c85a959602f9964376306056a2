@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.1",
+  "base_commit_sha": "81b3d34f8f7a05c85a959602f9964376306056a2",
+  "prompts": {
+    "a48d93fe03ec087d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fd02f96a-7310-46b0-9023-51b2b099858b",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 1
+    }
+  }
+}
