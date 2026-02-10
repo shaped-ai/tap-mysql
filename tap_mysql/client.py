@@ -198,26 +198,42 @@ class MySQLStream(SQLStream):
 
     def get_selected_schema(self) -> dict:
         """
-        Return selected schema, ensuring replication_key is always included.
+        Return selected schema, ensuring replication_key and primary_keys
+        are always included so downstream (target) and record pruning see them.
         """
         schema = copy.deepcopy(super().get_selected_schema())
-        if self.replication_key:
-            properties = schema.get("properties", {})
-            if self.replication_key not in properties:
-                full_props = self.schema.get("properties", {})
-                if self.replication_key in full_props:
-                    schema.setdefault("properties", {})[self.replication_key] = (
-                        full_props[
-                        self.replication_key
-                    ])
-                else:
-                    # Catalog may have replication_key but key not in schema;
-                    # add a generic date-time so SDK validation passes.
-                    schema.setdefault("properties", {})[self.replication_key] = {
+        full_props = self.schema.get("properties", {})
+        properties = schema.setdefault("properties", {})
+
+        def ensure_property(key: str) -> None:
+            if key and key not in properties:
+                if key in full_props:
+                    properties[key] = full_props[key]
+                elif key == self.replication_key:
+                    properties[key] = {
                         "type": ["string", "null"],
                         "format": "date-time",
                     }
+                else:
+                    properties[key] = {"type": ["string", "null"]}
+
+        if self.replication_key:
+            ensure_property(self.replication_key)
+        for key in self.primary_keys:
+            ensure_property(key)
         return schema
+
+    @property
+    def effective_schema(self) -> dict:
+        """Schema used for SCHEMA message and record pruning; include keys.
+
+        When the catalog selects a subset of columns, replication_key and
+        primary_keys can be omitted, causing the target to fail (e.g. missing
+        movie_id) and the tap to strip those properties from records. Return
+        get_selected_schema() so the emitted schema and pruning use a complete
+        schema that includes replication_key and primary_keys.
+        """
+        return self.get_selected_schema()
 
     @property
     def is_timestamp_replication_key(self) -> bool:
