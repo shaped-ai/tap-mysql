@@ -1,6 +1,7 @@
 """SQL client handling."""
 from __future__ import annotations
 
+import copy
 import datetime
 from typing import TYPE_CHECKING, Any, Iterable
 
@@ -193,6 +194,29 @@ class MySQLStream(SQLStream):
 
     # JSONB Objects won't be selected without type_confomance_level to ROOT_ONLY
     TYPE_CONFORMANCE_LEVEL = TypeConformanceLevel.ROOT_ONLY
+
+    def get_selected_schema(self) -> dict:
+        """
+        Return selected schema, ensuring replication_key is always included.
+        """
+        schema = copy.deepcopy(super().get_selected_schema())
+        if self.replication_key:
+            properties = schema.get("properties", {})
+            if self.replication_key not in properties:
+                full_props = self.schema.get("properties", {})
+                if self.replication_key in full_props:
+                    schema.setdefault("properties", {})[self.replication_key] = (
+                        full_props[
+                        self.replication_key
+                    ])
+                else:
+                    # Catalog may have replication_key but key not in schema;
+                    # add a generic date-time so SDK validation passes.
+                    schema.setdefault("properties", {})[self.replication_key] = {
+                        "type": ["string", "null"],
+                        "format": "date-time",
+                    }
+        return schema
 
     def get_records(self, context: dict | None) -> Iterable[dict[str, Any]]:
         """Return a generator of row-type dictionary objects.
