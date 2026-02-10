@@ -1,0 +1,23 @@
+meltano.yml
+  a48d93fe03ec087d 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.1",
+  "base_commit_sha": "ef26378bc46f3d916ace7c398ebefa97bef033a1",
+  "prompts": {
+    "a48d93fe03ec087d": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "fd02f96a-7310-46b0-9023-51b2b099858b",
+        "model": "default"
+      },
+      "human_author": "Karl Lyons <karl@shaped.ai>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
